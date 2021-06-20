@@ -64,11 +64,18 @@ class Dataset(dataset_mixin.DatasetMixin):
                     vollist = []
                     for i in s:
                         sl = slices[i].pixel_array+slices[i].RescaleIntercept
+                        # resize
                         if self.forceSpacing>0:
                             scaling = float(slices[i].PixelSpacing[0])/self.forceSpacing
                             sl = rescale(sl,scaling,mode="reflect",preserve_range=True)
+                        if args.size_reduction_factor != 1:
+                            if self.class_num>0 and ph=="B":
+                                sl = sl[::args.size_reduction_factor,::args.size_reduction_factor]
+                            else:
+                                sl = rescale(sl,1.0/args.size_reduction_factor,mode="reflect",preserve_range=True)
+                        # one-hot encoding
                         if self.class_num>0 and ph=="B":  # Only images in domain B
-                            sl = np.eye(self.class_num)[sl.astype(np.uint64)].transpose((2,0,1)) # one-hot encoding
+                            sl = np.eye(self.class_num)[sl.astype(np.uint64)].transpose((2,0,1))
                         else:
                             sl = self.img2var(sl[np.newaxis,],self.clip[ph]) # scaling to [-1,1]
                         vollist.append(sl.astype(self.dtype))
@@ -78,7 +85,7 @@ class Dataset(dataset_mixin.DatasetMixin):
                         self.names.append( [filenames[i] for i in s] )
                         self.dirs.append(os.path.basename(dirname))
 
-        print("Cropped size: ",self.crop, "ClipA: ",self.clip["A"], "ClipB: ",self.clip["B"])
+        print("Volume size: ", self.dcms["A"][0].shape, "Cropped size: ",self.crop, "ClipA: ",self.clip["A"], "ClipB: ",self.clip["B"])
         print("#dir {}, #file {}, #slices {}".format(len(dirlist),len(self.dcms),sum([len(fd) for fd in self.names])))
         self.A_ch = self.dcms["A"][0].shape[0]
         if phase is not None:

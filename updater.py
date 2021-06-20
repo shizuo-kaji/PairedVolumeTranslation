@@ -24,7 +24,10 @@ class pixupdater(chainer.training.StandardUpdater):
         if self.args.lambda_dis>0:
             self._buffer = ImagePool(50 * self.args.batch_size)
 
-        self.class_weight = 1.0
+        if self.args.class_weight is not None:
+            self.class_weight = self.xp.array(self.args.class_weight).reshape(1,-1,1,1,1)
+        else:
+            self.class_weight = 1.0
         # kernel for local average subtraction
         self.gauss = self.xp.array([sps.comb(self.args.local_avg_subtraction - 1, i) for i in range(self.args.local_avg_subtraction)]).reshape((1,1,1,1,-1))
         self.gauss /= self.gauss.sum()
@@ -59,9 +62,13 @@ class pixupdater(chainer.training.StandardUpdater):
             loss_gen = loss_gen + self.args.lambda_rec_l2*loss_rec_l2
             chainer.report({'loss_L2': loss_rec_l2}, gen)
         if self.args.lambda_focal>0:
-            loss_focal = losses.softmax_focalloss(x_out, t_out, gamma=self.args.focal_gamma)
+            loss_focal = losses.softmax_focalloss(x_out, t_out, gamma=self.args.focal_gamma, class_weight=self.class_weight)
             loss_gen = loss_gen + self.args.lambda_focal * loss_focal
             chainer.report({'loss_focal': loss_focal}, gen)
+        if self.args.lambda_dice>0:
+            loss_dice = losses.dice(x_out, t_out, class_weight=self.class_weight)
+            loss_gen = loss_gen + self.args.lambda_dice * loss_dice
+            chainer.report({'loss_dice': loss_dice}, gen)            
 
         # total variation
         if self.args.lambda_tv > 0:

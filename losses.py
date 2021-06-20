@@ -69,6 +69,12 @@ def softmax_focalloss(x, t, gamma=2, eps=1e-7, class_weight=1.0):
     q = -F.clip(t, x_min=eps, x_max=1-eps) * F.log(p)
     return F.average(class_weight * q * ((1 - p) ** gamma))
 
+def dice(x, t, eps=1e-7, class_weight=1.0):
+    x1 = x.transpose(1,0,2,3,4).reshape(x.shape[1],-1) # C x rest
+    t1 = t.transpose(1,0,2,3,4).reshape(t.shape[1],-1) # C x rest
+    res = F.sum(x1 * t1, axis=1) * class_weight
+    return( -F.sum(res / F.sum(x1*x1 + t1*t1+eps, axis=1)) )
+
 
 ## discriminator CE loss for fake (all values should be zero)
 def cross_entropy_dis_fake(y_fake):

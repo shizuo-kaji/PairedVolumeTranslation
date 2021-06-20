@@ -20,9 +20,10 @@ def arguments(suffix):
     parser.add_argument('--snapinterval', '-si', type=int, default=400,  help='take snapshot every this epoch')
     parser.add_argument('--nvis', type=int, default=1, help='number of images in visualisation after each epoch')
 
-    parser.add_argument('--crop_width', '-cw', type=int, default=256, help='this value may have to be divisible by a large power of two (if you encounter errors)')
-    parser.add_argument('--crop_height', '-ch', type=int, default=256, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--crop_width', '-cw', type=int, default=224, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--crop_height', '-ch', type=int, default=224, help='this value may have to be divisible by a large power of two (if you encounter errors)')
     parser.add_argument('--crop_depth', '-cd', type=int, default=48, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--size_reduction_factor', '-srf', type=int, default=1, help='this value may have to be divisible by a large power of two (if you encounter errors)')
     parser.add_argument('--clipA', '-ca', type=float, nargs=2, default=[-1024,0], help="lower and upper limit for pixel values of images in domain A")
     parser.add_argument('--clipB', '-cb', type=float, nargs=2, default=[-1024,0], help="lower and upper limit for pixel values of images in domain B")
     parser.add_argument('--class_num', '-cn', type=int, default=5, help='number of classes for pixelwise classification (only for images in domain B)')
@@ -32,8 +33,9 @@ def arguments(suffix):
     #
     parser.add_argument('--lambda_rec_l1', '-l1', type=float, default=0, help='weight for L1 reconstruction loss')
     parser.add_argument('--lambda_rec_l2', '-l2', type=float, default=1.0, help='weight for L2 reconstruction loss')
-    parser.add_argument('--lambda_focal', '-lf', type=float, default=10.0, help='weight for focal reconstruction loss')
+    parser.add_argument('--lambda_focal', '-lce', type=float, default=10.0, help='weight for focal reconstruction loss')
     parser.add_argument('--lambda_dis', '-ldis', type=float, default=0.0, help='weight for adversarial loss')
+    parser.add_argument('--lambda_dice', '-ldice', type=float, default=0.0, help='weight for channel-wise weighted dice loss')
     parser.add_argument('--lambda_tv', '-ltv', type=float, default=0.0, help='weight for total variation')
     parser.add_argument('--tv_tau', '-tt', type=float, default=1e-3, help='smoothing parameter for total variation')
     parser.add_argument('--focal_gamma', type=int, default=2)
