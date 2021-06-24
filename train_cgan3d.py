@@ -120,7 +120,7 @@ def main():
 
     ## save learnt results at an interval
     if args.snapinterval<0:
-        args.snapinterval = args.epoch
+        args.snapinterval = args.epoch // 2
     snapshot_interval = (args.snapinterval, 'epoch')
     display_interval = (10, 'iteration')
         

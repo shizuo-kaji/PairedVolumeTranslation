@@ -17,7 +17,7 @@ def arguments(suffix):
     parser.add_argument('--learning_rate', '-lr', type=float, default=1e-4)
     parser.add_argument('--loaderjob', '-j', type=int, default=5, help='Number of parallel data loading processes')
 
-    parser.add_argument('--snapinterval', '-si', type=int, default=400,  help='take snapshot every this epoch')
+    parser.add_argument('--snapinterval', '-si', type=int, default=-1,  help='take snapshot every this epoch')
     parser.add_argument('--nvis', type=int, default=1, help='number of images in visualisation after each epoch')
 
     parser.add_argument('--crop_width', '-cw', type=int, default=224, help='this value may have to be divisible by a large power of two (if you encounter errors)')
@@ -43,14 +43,10 @@ def arguments(suffix):
     parser.add_argument('--load_optimizer', '-mo', action='store_true', help='load optimizer parameters')
     parser.add_argument('--model_gen', '-m', default='')
     parser.add_argument('--model_dis', '-md', default='')
-    parser.add_argument('--optimizer', '-op',choices=optim.keys(),default='Adam',
-                        help='optimizer')
-    parser.add_argument('--weight_decay', '-wd', type=float, default=1e-8,  #default:  1e-7
-                        help='weight decay for regularization')
-    parser.add_argument('--lr_decay_strategy', '-lrs', choices=['exp','linear','none'], default='linear',
-                        help='strategy for learning rate decay')
-    parser.add_argument('--vis_freq', '-vf', type=int, default=500,
-                        help='visualisation frequency in iteration')
+    parser.add_argument('--optimizer', '-op',choices=optim.keys(),default='Adam',help='optimizer')
+    parser.add_argument('--weight_decay', '-wd', type=float, default=1e-8, help='weight decay for regularization')
+    parser.add_argument('--lr_decay_strategy', '-lrs', choices=['exp','linear','none'], default='linear', help='strategy for learning rate decay')
+    parser.add_argument('--vis_freq', '-vf', type=int, default=500, help='visualisation frequency in iteration')
 
     parser.add_argument('--dtype', '-dt', choices=dtypes.keys(), default='fp32',
                         help='floating point precision')

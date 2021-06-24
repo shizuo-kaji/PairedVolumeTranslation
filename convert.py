@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 #!/usr/bin/env python
 #############################
 ##
@@ -26,6 +27,7 @@ from arguments import arguments
 from consts import dtypes
 from dataset3d import Dataset
 import scipy.special as sps
+from skimage.transform import rescale
 
 def heatmap(heat,src):  ## heat [0,1], src [0,1] grey => [0,1] colour
 #    h = cv2.normalize(heat[0], h, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX)
@@ -50,14 +52,14 @@ if __name__ == '__main__':
 
     ## load arguments from "arg" file used in training
     if args.argfile:
-        with open(args.argfile, 'r') as f:
+        with open(args.argfile, 'r', encoding="utf-8_sig") as f:
             larg = json.load(f)
             root=os.path.dirname(args.argfile)
             for x in ['out','local_avg_subtraction','clip_max',
               'dis_norm','dis_activation','dis_chs','dis_ksize','dis_sample','dis_down',
               'gen_norm','gen_activation','gen_out_activation','gen_nblock','gen_chs','gen_sample','gen_down','gen_up','gen_ksize','unet',
               'gen_fc','gen_fc_activation','spconv','eqconv','dtype','clipA','clipB','class_num','out_ch',
-              'args.crop_depth', 'args.crop_height', 'args.crop_width']:
+              'args.crop_depth', 'args.crop_height', 'args.crop_width','size_reduction_factor']:
                 if x in larg:
                     setattr(args, x, larg[x])
             if not args.model_gen:
@@ -70,7 +72,7 @@ if __name__ == '__main__':
 
     print(args)
 
-    iterator = chainer.iterators.MultiprocessIterator(dataset, args.nvis, n_processes=8, repeat=False, shuffle=False)
+#    iterator = chainer.iterators.MultiprocessIterator(dataset, args.nvis, n_processes=8, repeat=False, shuffle=False)
 #    iterator = chainer.iterators.MultithreadIterator(dataset, args.batch_size, n_threads=3, repeat=False, shuffle=False)   ## best performance
 #    iterator = chainer.iterators.SerialIterator(dataset, args.batch_size,repeat=False, shuffle=False)
 
@@ -97,49 +99,46 @@ if __name__ == '__main__':
 
     cnt = 0
     salt = str(random.randint(1000, 999999))
-    for batch in iterator:
-        x_in, t_out = chainer.dataset.concat_examples(batch, device=args.gpu)
-        if args.local_avg_subtraction>0: # make it a 3D vol and apply 3D conv
-            x_in = x_in-F.convolution_3d(x_in[:,xp.newaxis,:,:,:],gauss,pad=(0,0,args.local_avg_subtraction//2))[:,0,:,:,:]
-        else:
-            x_in = Variable(x_in)
-        #x_in = F.clip(x_in,-args.clip_max,args.clip_max)/args.clip_max # clipping and scaling
-        with chainer.using_config('train', False), chainer.function.no_backprop_mode():
-            x_out = gen(x_in)
-        if args.gpu >= 0:
-            x_in = xp.asnumpy(x_in.array)
-            x_out = xp.asnumpy(x_out.array)
-            t_out = xp.asnumpy(t_out)
-            x_in = xp.asnumpy(x_in)
-        else:
-            x_in = x_in.array
-            x_out = x_out.array
-            x_in = x_in.array
-#        print(x_in.shape,out.shape,t_out.shape)
+    for idx in range(len(dataset.dcms["A"])):
+        fname = dataset.dirs[cnt]
+        path = os.path.join(outdir,fname) ## preserve directory structures
+        os.makedirs(path, exist_ok=True)
+        z_len = dataset.dcms["A"][idx][0].shape[1]
+        print("{}, {} slices".format(path, z_len), dataset.get_example(idx)[0].shape)
+        for z in range(0,z_len-args.crop_depth,args.crop_depth):
+            x_in = xp.asarray(dataset.get_example(idx,z_offset=z)[0])[np.newaxis,:]
+            if x_in.shape[2] < args.crop_depth:
+                x_in = xp.pad(x_in, ((0,0),(0,0),(0,args.crop_depth-x_in.shape[2]),(0,0),(0,0)),'constant', constant_values=-1)
+            #x_in, t_out = chainer.dataset.concat_examples(batch, device=args.gpu)
+            if args.local_avg_subtraction>0: # make it a 3D vol and apply 3D conv
+                x_in = x_in-F.convolution_3d(x_in[:,xp.newaxis,:,:,:],gauss,pad=(0,0,args.local_avg_subtraction//2))[:,0,:,:,:]
+            #x_in = F.clip(x_in,-args.clip_max,args.clip_max)/args.clip_max # clipping and scaling
+            with chainer.using_config('train', False), chainer.function.no_backprop_mode():
+                x_out = gen(x_in)
+            if args.gpu >= 0:
+                x_out = xp.asnumpy(x_out.array)[0]
+            else:
+                x_out = x_out.array[0]
+    #        print(x_in.shape,out.shape,t_out.shape)
 
-        ## output images
-        for i in range(len(x_out)):
-            fname = dataset.dirs[cnt]
-            path = os.path.join(outdir,fname) ## preserve directory structures
-            os.makedirs(path, exist_ok=True)
-            print("{}, shape, raw value: {} {} {}".format(fname,x_out[i].shape,np.min(x_out[i]),np.max(x_out[i]),x_out[i].shape))
+            ## output images
+            print("{}_{}, shape, raw value: {} {}".format(fname,z,x_out.shape,np.min(x_out),np.max(x_out)))
             if args.class_num>0:
-                new = np.argmax(x_out[i],axis=0)
+                new = np.argmax(x_out,axis=0)
                 airvalue = 0
                 print(new.shape)
             else:
                 airvalue = None
-                new = dataset.var2img(x_out[i],args.clipB)
-            np.save(os.path.join(path,"{}.npy".format(fname)),new)
-            for j in range(len(new)):
-                print(path)
-                fn = dataset.names[cnt][j + (len(dataset.names[cnt])-len(new))//2]
+                new = dataset.var2img(x_out,args.clipB)
+            new = rescale(new,args.size_reduction_factor,mode="reflect",preserve_range=True)
+            np.save(os.path.join(path,"{}_z{}.npy".format(fname,z)),new)
+            for j in range(min(len(new),len(dataset.names[cnt])-z)):
+                fn = dataset.names[cnt][z+j]
                 ref_dicom = dataset.overwrite_dicom(new[j],fn,salt,airvalue=airvalue)
                 ref_dicom.save_as(os.path.join(path,os.path.basename(fn)))
-            cnt += 1
+        cnt += 1
         ####
     elapsed_time = time.time() - start
     print ("{} volumes in {} sec".format(cnt,elapsed_time))
-    iterator.finalize()
 
 

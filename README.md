@@ -39,14 +39,21 @@ For example, follow the following procedure:
 
 You will see some warning messages, but you can ignore them.
 
+## Licence
+MIT Licence
 
-## Training Data
+## Training Data Preparation
+
 
 ## Training
+Example:
+
+    python train_cgan3d.py -R data_cn4 -l1 0 -l2 1 -ldice 1 -ldis 0 -ca -1200 100 -vf 100 -u concat -rt 8 -e 1000 -cn 4 --class_weight 1 1 100 1000 -srf 2
+
+
+![Sample](https://github.com/shizuo-kaji/pix2pix3d/blob/master/demo/count0010000.jpg?raw=true)
+
 
 ## Conversion with a trained model
 
-
-## Licence
-MIT Licence
 

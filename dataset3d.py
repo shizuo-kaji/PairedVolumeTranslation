@@ -100,7 +100,7 @@ class Dataset(dataset_mixin.DatasetMixin):
     def img2var(self,img, clip): 
         return(2*(np.clip(img,clip[0],clip[0]+(clip[1]-clip[0]))-clip[0])/(clip[1]-clip[0])-1.0)        
     
-    def get_example(self, i):
+    def get_example(self, i, z_offset=-1):
         imgs_in = self.dcms["A"][i]
         if not self.validation_mode:
             imgs_out = self.dcms["B"][i]
@@ -114,10 +114,16 @@ class Dataset(dataset_mixin.DatasetMixin):
             for i,C in enumerate(self.crop):
                 offsets = random.randint( max(0,(imgs_in.shape[i+1]-C)//2-self.random_tr), min((imgs_in.shape[i+1]-C)//2+self.random_tr,imgs_in.shape[i+1]-C) )
                 slices[i] = slice(offsets, offsets + C)
+            # slide z-axis
+            r = random.randint(0,imgs_in.shape[1]-self.crop[0])
+            slices[0] = slice(r, r+self.crop[0])
         else: # centre crop
             for i,C in enumerate(self.crop):
                 offsets = max(imgs_in.shape[i+1] - C,0) // 2
                 slices[i] = slice(offsets, offsets + C)
+            # slide z-axis
+            if z_offset >= 0:
+                slices[0] = slice(z_offset, z_offset+self.crop[0])
         #print(imgs_in.shape, x_offset, imgs_in[:,y_slice,x_slice].shape, imgs_out[:,y_slice,x_slice].shape)
         if self.validation_mode:
             return imgs_in[:,slices[0],slices[1],slices[2]], imgs_in[:,slices[0],slices[1],slices[2]]
