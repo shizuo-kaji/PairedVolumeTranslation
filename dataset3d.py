@@ -68,11 +68,6 @@ class Dataset(dataset_mixin.DatasetMixin):
                         if self.forceSpacing>0:
                             scaling = float(slices[i].PixelSpacing[0])/self.forceSpacing
                             sl = rescale(sl,scaling,mode="reflect",preserve_range=True)
-                        if args.size_reduction_factor != 1:
-                            if self.class_num>0 and ph=="B":
-                                sl = sl[::args.size_reduction_factor,::args.size_reduction_factor]
-                            else:
-                                sl = rescale(sl,1.0/args.size_reduction_factor,mode="reflect",preserve_range=True)
                         # one-hot encoding
                         if self.class_num>0 and ph=="B":  # Only images in domain B
                             sl = np.eye(self.class_num)[sl.astype(np.uint64)].transpose((2,0,1))
@@ -80,6 +75,9 @@ class Dataset(dataset_mixin.DatasetMixin):
                             sl = self.img2var(sl[np.newaxis,],self.clip[ph]) # scaling to [-1,1]
                         vollist.append(sl.astype(self.dtype))
                     volume = np.stack(vollist,axis=1)   # shape = (c,z,h,w)
+                    if args.size_reduction_factor != 1:
+                        scl = 1.0/args.size_reduction_factor
+                        volume = rescale(volume,(1,scl,scl,scl),mode="reflect",preserve_range=True)
                     self.dcms[ph].append(volume)
                     if ph == "A":
                         self.names.append( [filenames[i] for i in s] )

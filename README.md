@@ -43,17 +43,43 @@ You will see some warning messages, but you can ignore them.
 MIT Licence
 
 ## Training Data Preparation
+```
+data_cn4
++-- trainA
+|   +-- patient1
+|   |   +-- patient1_001.dcm
+|   |   +-- patient1_002.dcm
+|   |   +-- ...
+|   +-- patient2
+|   +-- ...
++-- trainB
+|   +-- patient1
+|   |   +-- patient1_001.dcm
+|   |   +-- patient1_002.dcm
+|   +-- patient2
+|   +-- ...
++-- testA
+|   +-- patient3
+|   +-- patient4
++-- testB
+|   +-- patient3
+|   +-- patient4
+```
+The model learns to convert image domains from trainA to trainB.
+testA and testB are used for evaluation during training.
+Each directory, for example patient1, contains a series of DICOM files to form a volume.
 
 
 ## Training
 Example:
 
-    python train_cgan3d.py -R data_cn4 -l1 0 -l2 1 -ldice 1 -ldis 0 -ca -1200 100 -vf 100 -u concat -rt 8 -e 1000 -cn 4 --class_weight 1 1 100 1000 -srf 2
+    python train_cgan3d.py -R data_cn4 -l1 0 -l2 0 -ldice 10 -ldis 0 -ca -1200 100 -vf 100 -u concat -gu resize -rt 8 -e 1000 -cn 4 --class_weight 1 1 100 1000 -srf 2
 
-
-![Sample](https://github.com/shizuo-kaji/pix2pix3d/blob/master/demo/count0010000.jpg?raw=true)
+![Sample](https://github.com/shizuo-kaji/pix2pix3d/blob/main/demo/count0010000.jpg?raw=true)
 
 
 ## Conversion with a trained model
+
+    python convert.py -R data_cn4/testA -a result/2021???/args
 
 

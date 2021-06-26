@@ -105,7 +105,8 @@ if __name__ == '__main__':
         os.makedirs(path, exist_ok=True)
         z_len = dataset.dcms["A"][idx][0].shape[1]
         print("{}, {} slices".format(path, z_len), dataset.get_example(idx)[0].shape)
-        for z in range(0,z_len-args.crop_depth,args.crop_depth):
+        for z in range(0,z_len-args.crop_depth,args.crop_depth): ## TODO: slide and vote
+            z_real = z * args.size_reduction_factor
             x_in = xp.asarray(dataset.get_example(idx,z_offset=z)[0])[np.newaxis,:]
             if x_in.shape[2] < args.crop_depth:
                 x_in = xp.pad(x_in, ((0,0),(0,0),(0,args.crop_depth-x_in.shape[2]),(0,0),(0,0)),'constant', constant_values=-1)
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     #        print(x_in.shape,out.shape,t_out.shape)
 
             ## output images
-            print("{}_{}, shape, raw value: {} {}".format(fname,z,x_out.shape,np.min(x_out),np.max(x_out)))
+            print("{}_{}, {}, min-max values: {} {}".format(fname,z,x_out.shape,np.min(x_out),np.max(x_out)))
             if args.class_num>0:
                 new = np.argmax(x_out,axis=0)
                 airvalue = 0
@@ -131,9 +132,9 @@ if __name__ == '__main__':
                 airvalue = None
                 new = dataset.var2img(x_out,args.clipB)
             new = rescale(new,args.size_reduction_factor,mode="reflect",preserve_range=True)
-            np.save(os.path.join(path,"{}_z{}.npy".format(fname,z)),new)
-            for j in range(min(len(new),len(dataset.names[cnt])-z)):
-                fn = dataset.names[cnt][z+j]
+            np.save(os.path.join(path,"{}_z{}.npy".format(fname,z_real)),new)
+            for j in range(min(len(new),len(dataset.names[cnt])-z_real)):
+                fn = dataset.names[cnt][z_real+j]
                 ref_dicom = dataset.overwrite_dicom(new[j],fn,salt,airvalue=airvalue)
                 ref_dicom.save_as(os.path.join(path,os.path.basename(fn)))
         cnt += 1

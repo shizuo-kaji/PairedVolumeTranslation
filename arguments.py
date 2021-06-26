@@ -117,7 +117,7 @@ def arguments(suffix):
                         help='use u-net for generator')
 
     args = parser.parse_args()
-    args.out = os.path.join(args.out, dt.now().strftime('%m%d_%H%M')+"_"+suffix)
+    args.out = os.path.join(args.out, dt.now().strftime('%Y%m%d_%H%M_3d')+"_"+suffix)
     args.wgan=False
 
     if not args.gen_chs:
