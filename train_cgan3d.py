@@ -142,13 +142,14 @@ def main():
 
     ## log outputs
     log_keys = ['epoch', 'iteration','lr']
-    log_keys_gen = ['gen/loss_L1', 'gen/loss_L2', 'gen/loss_focal','gen/loss_dis', 'myval/loss_L2', 'myval/loss_CE', 'gen/loss_tv']
+    log_keys_gen = ['gen/loss_L1', 'gen/loss_L2', 'gen/loss_focal','gen/loss_dis', 'myval/loss_L2', 'myval/loss_focal','gen/loss_tv']
     log_keys_dis = ['dis/loss_real','dis/loss_fake']
     trainer.extend(extensions.LogReport(trigger=display_interval))
     trainer.extend(extensions.PrintReport(log_keys+log_keys_gen+log_keys_dis), trigger=display_interval)
     if extensions.PlotReport.available():
         trainer.extend(extensions.PlotReport(log_keys_gen, 'iteration', trigger=display_interval, file_name='loss_gen.png', postprocess=plot_log))
         trainer.extend(extensions.PlotReport(log_keys_dis, 'iteration', trigger=display_interval, file_name='loss_dis.png'))
+        trainer.extend(extensions.PlotReport(['myval/loss_dice', 'gen/loss_dice'], 'iteration', trigger=display_interval, file_name='loss_dice.png'))
     trainer.extend(extensions.ProgressBar(update_interval=10))
 #    trainer.extend(extensions.ParameterStatistics(gen))
     # learning rate scheduling

@@ -16,6 +16,7 @@ import scipy.special as sps
 import cv2
 import losses
 from matplotlib import colors
+from skimage.transform import rescale
 
 def var2unit_img(var, base=-1.0, rng=2.0):
     img = var.data.get()
@@ -73,7 +74,8 @@ class VisEvaluator(extensions.Evaluator):
                 loss_rec_L1 = F.mean_absolute_error(x_out, t_out)
                 loss_rec_L2 = F.mean_squared_error(x_out, t_out)
                 loss_rec_CE = losses.softmax_focalloss(x_out, t_out, gamma=self.args.focal_gamma, class_weight=self.class_weight)
-                result = {"myval/loss_L1": loss_rec_L1, "myval/loss_L2": loss_rec_L2, "myval/loss_CE": loss_rec_CE}
+                loss_rec_dice = losses.dice(x_out, t_out, class_weight=self.class_weight)
+                result = {"myval/loss_L1": loss_rec_L1, "myval/loss_L2": loss_rec_L2, "myval/loss_focal": loss_rec_CE, "myval/loss_dice": loss_rec_dice}
 
             #heat = [heatmap(x_out[j],x_in[j]) for j in range(len(x_out))]
             #print(np.min(x_in),np.max(x_in),np.min(x_out),np.max(x_out),np.min(t_out),np.max(t_out))
@@ -85,8 +87,9 @@ class VisEvaluator(extensions.Evaluator):
                     outs = var2unit_img(var) # tanh
 #                print(imgs.shape,np.min(imgs),np.max(imgs))
                 imgs = []
-                for im in outs:
-                    imgs.extend([im[im.shape[0]//2], im[:,im.shape[1]//2], im[:,:,im.shape[2]//2]])
+                for im in outs: ## central slices along 3-axes
+                    axial = rescale(im[im.shape[0]//2],self.args.size_reduction_factor,order=0, mode="reflect",preserve_range=True)
+                    imgs.extend([axial, im[:,im.shape[1]//2], im[:,:,im.shape[2]//2]])
                 for j,im in enumerate(imgs):
                     ax = fig.add_subplot(gs[j+k*len(imgs),i])
                     ax.set_title(dataset+"_"+domain[i], fontsize=8)

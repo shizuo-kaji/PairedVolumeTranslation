@@ -77,7 +77,7 @@ class Dataset(dataset_mixin.DatasetMixin):
                     volume = np.stack(vollist,axis=1)   # shape = (c,z,h,w)
                     if args.size_reduction_factor != 1:
                         scl = 1.0/args.size_reduction_factor
-                        volume = rescale(volume,(1,scl,scl,scl),mode="reflect",preserve_range=True)
+                        volume = rescale(volume,(1,scl,scl,scl),mode="reflect",preserve_range=True,order=0)
                     self.dcms[ph].append(volume)
                     if ph == "A":
                         self.names.append( [filenames[i] for i in s] )

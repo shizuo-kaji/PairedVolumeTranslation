@@ -32,8 +32,8 @@ def arguments(suffix):
 
     #
     parser.add_argument('--lambda_rec_l1', '-l1', type=float, default=0, help='weight for L1 reconstruction loss')
-    parser.add_argument('--lambda_rec_l2', '-l2', type=float, default=1.0, help='weight for L2 reconstruction loss')
-    parser.add_argument('--lambda_focal', '-lce', type=float, default=10.0, help='weight for focal reconstruction loss')
+    parser.add_argument('--lambda_rec_l2', '-l2', type=float, default=0.0, help='weight for L2 reconstruction loss')
+    parser.add_argument('--lambda_focal', '-lce', type=float, default=1.0, help='weight for focal reconstruction loss')
     parser.add_argument('--lambda_dis', '-ldis', type=float, default=0.0, help='weight for adversarial loss')
     parser.add_argument('--lambda_dice', '-ldice', type=float, default=0.0, help='weight for channel-wise weighted dice loss')
     parser.add_argument('--lambda_tv', '-ltv', type=float, default=0.0, help='weight for total variation')

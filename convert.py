@@ -44,7 +44,8 @@ if __name__ == '__main__':
     args = arguments("cgan_out")
     args.suffix = "out"
     args.imgtype="npy"
-    outdir = os.path.join(args.out, dt.now().strftime('out_%Y%m%d_%H%M'))
+    #outdir = os.path.join(args.out, dt.now().strftime('out_%Y%m%d_%H%M'))
+    outdir = args.out
 
     if args.gpu >= 0:
         chainer.cuda.get_device_from_id(args.gpu).use()
@@ -131,8 +132,8 @@ if __name__ == '__main__':
             else:
                 airvalue = None
                 new = dataset.var2img(x_out,args.clipB)
-            new = rescale(new,args.size_reduction_factor,mode="reflect",preserve_range=True)
-            np.save(os.path.join(path,"{}_z{}.npy".format(fname,z_real)),new)
+            new = rescale(new,args.size_reduction_factor,order=0, mode="reflect",preserve_range=True)
+            #np.save(os.path.join(path,"{}_z{}.npy".format(fname,z_real)),new)
             for j in range(min(len(new),len(dataset.names[cnt])-z_real)):
                 fn = dataset.names[cnt][z_real+j]
                 ref_dicom = dataset.overwrite_dicom(new[j],fn,salt,airvalue=airvalue)

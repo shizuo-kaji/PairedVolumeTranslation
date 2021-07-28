@@ -2,6 +2,8 @@ Volume-to-volume translation by CNNs trained on paired data
 =============
 written by Shizuo KAJI
 
+CAUTION: This code is at an early beta stage!
+
 This is an implementation of volume-to-volume translation using a paired volume dataset.
 It can be used for various tasks including
 - segmentation, denoising, super-resolution, modality-conversion, and reconstruction
