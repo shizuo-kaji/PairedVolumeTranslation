@@ -20,15 +20,19 @@ def arguments(suffix):
     parser.add_argument('--snapinterval', '-si', type=int, default=-1,  help='take snapshot every this epoch')
     parser.add_argument('--nvis', type=int, default=1, help='number of images in visualisation after each epoch')
 
-    parser.add_argument('--crop_width', '-cw', type=int, default=224, help='this value may have to be divisible by a large power of two (if you encounter errors)')
-    parser.add_argument('--crop_height', '-ch', type=int, default=224, help='this value may have to be divisible by a large power of two (if you encounter errors)')
-    parser.add_argument('--crop_depth', '-cd', type=int, default=48, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--crop_width', '-cw', type=int, default=448, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--crop_height', '-ch', type=int, default=448, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--crop_depth', '-cd', type=int, default=16, help='this value may have to be divisible by a large power of two (if you encounter errors)')
     parser.add_argument('--size_reduction_factor', '-srf', type=int, default=1, help='this value may have to be divisible by a large power of two (if you encounter errors)')
+    parser.add_argument('--plane', '-pl', type=str, default="axial", choices=["axial","sagittal","coronal"], help='the main plane to be considered')
     parser.add_argument('--clipA', '-ca', type=float, nargs=2, default=[-1024,0], help="lower and upper limit for pixel values of images in domain A")
     parser.add_argument('--clipB', '-cb', type=float, nargs=2, default=[-1024,0], help="lower and upper limit for pixel values of images in domain B")
     parser.add_argument('--class_num', '-cn', type=int, default=5, help='number of classes for pixelwise classification (only for images in domain B)')
     parser.add_argument('--class_weight', type=float, nargs="*", help='weight for each class for pixelwise classification (only for images in domain B)')
     parser.add_argument('--local_avg_subtraction', '-las', type=int, default=-1, help='kernel size of local average subtraction: should be an odd number')
+
+    parser.add_argument('--output_image_type', '-ot', type=str, default="dcm", choices=["dcm","nrrd","npy"], help='Image type for conversion')
+    parser.add_argument('--slide_step', '-ss', type=int, default=-1, help='step size for sliding window for conversion')
 
     #
     parser.add_argument('--lambda_rec_l1', '-l1', type=float, default=0, help='weight for L1 reconstruction loss')

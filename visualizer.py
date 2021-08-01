@@ -88,8 +88,8 @@ class VisEvaluator(extensions.Evaluator):
 #                print(imgs.shape,np.min(imgs),np.max(imgs))
                 imgs = []
                 for im in outs: ## central slices along 3-axes
-                    axial = rescale(im[im.shape[0]//2],self.args.size_reduction_factor,order=0, mode="reflect",preserve_range=True)
-                    imgs.extend([axial, im[:,im.shape[1]//2], im[:,:,im.shape[2]//2]])
+                    #axial = rescale(im[im.shape[0]//2],self.args.size_reduction_factor,order=0, mode="reflect",preserve_range=True)
+                    imgs.extend([im[im.shape[0]//2], im[:,im.shape[1]//2], im[:,:,im.shape[2]//2]])
                 for j,im in enumerate(imgs):
                     ax = fig.add_subplot(gs[j+k*len(imgs),i])
                     ax.set_title(dataset+"_"+domain[i], fontsize=8)

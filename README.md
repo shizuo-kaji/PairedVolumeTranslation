@@ -23,9 +23,9 @@ This code is based on
 ### Requirements
 - a modern GPU with a large memory (the crop_size should be reduced for GPUs with less than 20G memory)
 - python 3: [Anaconda](https://anaconda.org) is recommended
-- chainer >= 7.2.0, cupy, chainerui, chainercv, opecv, pydicom: install them by
+- chainer >= 7.2.0, cupy, chainerui, chainercv, opecv, pydicom, pynrrd: install them by
 ```
-pip install cupy chainer chainerui chainercv opencv-contrib-python pydicom
+pip install cupy chainer chainerui chainercv opencv-contrib-python pydicom pynrrd
 ```
 
 Note that with GeForce 30 RTX series, 

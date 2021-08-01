@@ -78,6 +78,10 @@ class Dataset(dataset_mixin.DatasetMixin):
                     if args.size_reduction_factor != 1:
                         scl = 1.0/args.size_reduction_factor
                         volume = rescale(volume,(1,scl,scl,scl),mode="reflect",preserve_range=True,order=0)
+                    if args.plane == "sagittal":
+                        volume = volume.transpose((0,3,1,2))
+                    elif args.plane == "coronal":
+                        volume = volume.transpose((0,2,1,3))
                     self.dcms[ph].append(volume)
                     if ph == "A":
                         self.names.append( [filenames[i] for i in s] )
@@ -147,7 +151,7 @@ class Dataset(dataset_mixin.DatasetMixin):
         img = img.astype(dt)           
 #        print("min {}, max {}, intercept {}\n".format(np.min(img),np.max(img),ref_dicom.RescaleIntercept))
 #            print(img.shape, img.dtype)
-        ref_dicom.PixelData = img.tostring()
+        ref_dicom.PixelData = img.tobytes()
         ## UID should be changed for dcm's under different dir
         #                uid=dicom.UID.generate_uid()
         #                uid = dicom.UID.UID(uid.name[:-len(args.suffix)]+args.suffix)
