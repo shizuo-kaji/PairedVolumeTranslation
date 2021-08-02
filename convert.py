@@ -144,6 +144,7 @@ if __name__ == '__main__':
                 out_vol[:,:x_out.shape[1]] = x_out
             elif z==z_max:
                 out_vol[:,(z+zl):] = x_out[:,zl:]
+                break
             else:
                 out_vol[:,(z+zl):(z+zl+args.slide_step)] = x_out[:,zl:(zl+args.slide_step)]
         # save volume

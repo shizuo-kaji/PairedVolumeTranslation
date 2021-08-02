@@ -48,6 +48,7 @@ def main():
     test_iter_gt = chainer.iterators.SerialIterator(train_d, args.nvis, shuffle=False)   ## same as training data; used for validation
 
     args.out_ch = train_d.B_ch
+    os.makedirs(args.out, exist_ok=True)
     with open(os.path.join(args.out, "args.json"), mode="w") as f:
         json.dump(args.__dict__, f, indent=4)
     with open(os.path.join(args.out,"args.txt"), 'w') as fh:
@@ -142,8 +143,19 @@ def main():
 
     ## log outputs
     log_keys = ['epoch', 'iteration','lr']
-    log_keys_gen = ['gen/loss_L1', 'gen/loss_L2', 'gen/loss_focal','gen/loss_tv', 'myval/loss_L1', 'myval/loss_L2', 'myval/loss_focal']
-    log_keys_dis = ['dis/loss_real','dis/loss_fake','gen/loss_dis']
+    log_keys_gen = ['myval/loss_L1', 'myval/loss_L2', 'myval/loss_focal']
+    if args.lambda_rec_l1>0:
+        log_keys_gen.append('gen/loss_L1')
+    if args.lambda_rec_l2>0:
+        log_keys_gen.append('gen/loss_L2')
+    if args.lambda_focal>0:
+        log_keys_gen.append('gen/loss_focal')
+    if args.lambda_tv>0:
+        log_keys_gen.append('gen/loss_tv')
+    if args.lambda_dis>0:
+        log_keys_dis = ['dis/loss_real','dis/loss_fake','gen/loss_dis']
+    else:
+        log_keys_dis = []
     trainer.extend(extensions.LogReport(trigger=display_interval))
     trainer.extend(extensions.PrintReport(log_keys+log_keys_gen+log_keys_dis), trigger=display_interval)
     if extensions.PlotReport.available():
