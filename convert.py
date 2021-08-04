@@ -60,7 +60,7 @@ if __name__ == '__main__':
               'dis_norm','dis_activation','dis_chs','dis_ksize','dis_sample','dis_down',
               'gen_norm','gen_activation','gen_out_activation','gen_nblock','gen_chs','gen_sample','gen_down','gen_up','gen_ksize','unet',
               'gen_fc','gen_fc_activation','spconv','eqconv','dtype','clipA','clipB','class_num','out_ch',
-              'crop_depth', 'crop_height', 'crop_width','size_reduction_factor']:
+              'crop_depth', 'crop_height', 'crop_width','size_reduction_factor','plane']:
                 if x in larg:
                     setattr(args, x, larg[x])
             if not args.model_gen:
@@ -147,13 +147,19 @@ if __name__ == '__main__':
                 break
             else:
                 out_vol[:,(z+zl):(z+zl+args.slide_step)] = x_out[:,zl:(zl+args.slide_step)]
-        # save volume
+        # inverse transpose
+        if args.plane == "sagittal":
+            out_vol = out_vol.transpose((0,2,3,1))
+        elif args.plane == "coronal":
+            out_vol = out_vol.transpose((0,2,1,3))
+        # highest score
         if args.class_num>0:
             prob_vol = out_vol
             out_vol = np.argmax(prob_vol,axis=0)
         # rescale back
         if args.size_reduction_factor != 1:
             out_vol = rescale(out_vol,args.size_reduction_factor,order=0, mode="reflect",preserve_range=True).astype(out_vol.dtype)
+        # save volume
         print("{}, {}, min-max values: {} {}".format(dname,out_vol.shape,np.min(out_vol),np.max(out_vol)))
         if args.output_image_type == "dcm":
             for j in range(len(out_vol)):

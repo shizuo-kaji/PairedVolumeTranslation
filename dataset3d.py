@@ -48,7 +48,6 @@ class Dataset(dataset_mixin.DatasetMixin):
                     dnph = dirname.replace(phase+"A",phase+ph)
                 else:
                     dnph = dirname
-                print(dnph)
                 files = [os.path.join(dnph, fname) for fname in sorted(os.listdir(dnph), key=num) if fname.endswith(".dcm")]
                 slices = []
                 filenames = []
@@ -86,8 +85,9 @@ class Dataset(dataset_mixin.DatasetMixin):
                     if ph == "A":
                         self.names.append( [filenames[i] for i in s] )
                         self.dirs.append(os.path.basename(dirname))
+                    print(dnph, "volume size: ", volume.shape)
 
-        print("Volume size: ", self.dcms["A"][0].shape, "Cropped size: ",self.crop, "ClipA: ",self.clip["A"], "ClipB: ",self.clip["B"])
+        print("Cropped size: ",self.crop, "ClipA: ",self.clip["A"], "ClipB: ",self.clip["B"])
         print("#dir {}, #file {}, #slices {}".format(len(dirlist),len(self.dcms),sum([len(fd) for fd in self.names])))
         self.A_ch = self.dcms["A"][0].shape[0]
         if phase is not None:
